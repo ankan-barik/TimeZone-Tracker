@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Clock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            background-image: radial-gradient(circle, rgba(238,238,238,1) 0%, rgba(245,245,245,1) 100%);
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            margin-right: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .navbar-brand::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background-color: #007bff;
+            animation: slideBorder 3s ease infinite;
+        }
+        
+        @keyframes slideBorder {
+            0% { left: -100%; }
+            50% { left: 0; }
+            100% { left: 100%; }
+        }
+        
+        .nav-item {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .dropdown {
+            margin-right: 15px;
+        }
+        
+        .disabled {
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .search-container {
+            margin-left: auto;
+            display: flex;
+        }
+        
+        .search-input {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0,123,255,0.5);
+            border-color: #007bff;
+        }
+        
+        .search-btn {
+            padding: 5px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .main-title {
+            text-align: center;
+            margin: 30px 0;
+            font-size: 32px;
+            color: #333;
+            position: relative;
+            animation: fadeIn 1.5s ease;
+        }
+        
+        .main-title::after {
+            content: "";
+            display: block;
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #007bff, transparent);
+            margin: 10px auto 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .clock-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .clock-card {
+            flex: 1;
+            min-width: 300px;
+            max-width: 350px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .clock-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        
+        .clock-card:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        
+        .clock-card:nth-child(3) {
+            animation-delay: 0.5s;
+        }
+        
+        .clock-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-header {
+            padding: 15px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .clock-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #333;
+            position: relative;
+            margin-left: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .clock-icon::before {
+            content: "";
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 4px;
+            height: 1px;
+            background: #333;
+            transform-origin: 0 0;
+            animation: hourHand 12s linear infinite;
+        }
+        
+        .clock-icon::after {
+            content: "";
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 5px;
+            height: 1px;
+            background: #333;
+            transform-origin: 0 0;
+            animation: minuteHand 60s linear infinite;
+        }
+        
+        @keyframes hourHand {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes minuteHand {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .time-display {
+            padding: 25px 15px;
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to right, #f8f9fa, #fff, #f8f9fa);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .card-details {
+            padding: 0 15px 15px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-line {
+            margin: 5px 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .detail-line:hover {
+            color: #007bff;
+            transform: translateX(5px);
+        }
+        
+        .card-footer {
+            padding: 15px;
+            text-align: center;
+            background-color: rgba(248, 249, 250, 0.5);
+        }
+        
+        .card-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            background-color: #fff;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .card-btn:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: #007bff;
+            transition: all 0.3s;
+            z-index: -1;
+        }
+        
+        .card-btn:hover {
+            color: #fff;
+        }
+        
+        .card-btn:hover:before {
+            width: 100%;
+        }
+
+        .contact-btn {
+            background-color: #fff;
+            border: 1px solid #007bff;
+            color: #007bff;
+        }
+        
+        .alarm-section {
+            max-width: 1200px;
+            margin: 50px auto 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            animation: fadeIn 1s ease;
+            animation-delay: 0.7s;
+            animation-fill-mode: both;
+        }
+        
+        .alarm-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .alarm-title::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 50px;
+            height: 2px;
+            background-color: #007bff;
+            transition: width 0.3s ease;
+        }
+        
+        .alarm-title:hover::after {
+            width: 100%;
+        }
+        
+        .alarm-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .time-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .time-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0,123,255,0.5);
+        }
+        
+        /* Background animation */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff, #00c6ff);
+            opacity: 0.2;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-100px) translateX(100px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(0) translateX(0) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation" id="bg-animation"></div>
+    
+    <nav class="navbar">
+        <div class="navbar-brand">Welcome to World Clock</div>
+        
+        <div class="search-container">
+            <input type="text" placeholder="Search" class="search-input">
+            <button class="search-btn">Search</button>
+        </div>
+    </nav>
+
+    <h1 class="main-title">Welcome to World Clock</h1>
+    
+    <div class="clock-container">
+        <div class="clock-card">
+            <div class="card-header">
+                India <span class="clock-icon"></span>
+            </div>
+            <div class="time-display" id="india-time">5:47:21 PM</div>
+            <div class="card-details">
+                <div class="detail-line">10 users included</div>
+                <div class="detail-line">2 GB of storage</div>
+                <div class="detail-line">Email support</div>
+                <div class="detail-line">Help center access</div>
+            </div>
+            <div class="card-footer">
+                <a href="#" class="card-btn">More About This Zone</a>
+            </div>
+        </div>
+        
+        <div class="clock-card">
+            <div class="card-header">
+                United States <span class="clock-icon"></span>
+            </div>
+            <div class="time-display" id="us-time">4:17:21 AM</div>
+            <div class="card-details">
+                <div class="detail-line">20 users included</div>
+                <div class="detail-line">10 GB of storage</div>
+                <div class="detail-line">Priority email support</div>
+                <div class="detail-line">Help center access</div>
+            </div>
+            <div class="card-footer">
+                <a href="#" class="card-btn">More About This Zone</a>
+            </div>
+        </div>
+        
+        <div class="clock-card">
+            <div class="card-header">
+                China <span class="clock-icon"></span>
+            </div>
+            <div class="time-display" id="china-time">8:17:21 PM</div>
+            <div class="card-details">
+                <div class="detail-line">30 users included</div>
+                <div class="detail-line">15 GB of storage</div>
+                <div class="detail-line">Phone and email support</div>
+                <div class="detail-line">Help center access</div>
+            </div>
+            <div class="card-footer">
+                <a href="#" class="card-btn contact-btn">Contact us</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alarm-section">
+        <h2 class="alarm-title">Set an Alarm</h2>
+        <div class="alarm-form">
+            <label for="alarm-time">Select a time for your Alarm:</label>
+            <input type="time" id="alarm-time" class="time-input" value="--:-- --">
+        </div>
+    </div>
+
+    <script>
+        // Function to update clocks with accurate time for each timezone
+        function updateClocks() {
+            // Using Intl.DateTimeFormat to correctly format time for each timezone
+            function getTimeForTimezone(timezone) {
+                const options = {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true,
+                    timeZone: timezone
+                };
+                
+                try {
+                    const formatter = new Intl.DateTimeFormat('en-US', options);
+                    return formatter.format(new Date());
+                } catch (e) {
+                    console.error("Error formatting time for timezone:", timezone, e);
+                    return "Time unavailable";
+                }
+            }
+            
+            // For real-time updates with proper timezone handling
+            document.getElementById('india-time').textContent = getTimeForTimezone('Asia/Kolkata');
+            document.getElementById('us-time').textContent = getTimeForTimezone('America/New_York');
+            document.getElementById('china-time').textContent = getTimeForTimezone('Asia/Shanghai');
+        }
+        
+        // For real-time updating clocks
+        // Update clocks every second
+        setInterval(updateClocks, 1000);
+        
+        // Initial clock update
+        updateClocks();
+        
+        // For demonstration purposes, you might want to use static times initially
+        // Uncomment the following lines to show the exact times from the image
+        // document.getElementById('india-time').textContent = "5:47:21 PM";
+        // document.getElementById('us-time').textContent = "4:17:21 AM";
+        // document.getElementById('china-time').textContent = "8:17:21 PM";
+        
+        // Create floating circles in the background
+        function createFloatingCircles() {
+            const bgAnimation = document.getElementById('bg-animation');
+            const circleCount = 8;
+            
+            for (let i = 0; i < circleCount; i++) {
+                const circle = document.createElement('div');
+                circle.classList.add('floating-circle');
+                
+                // Random positioning and sizes
+                const size = Math.floor(Math.random() * 150) + 50; // 50-200px
+                const left = Math.floor(Math.random() * 100); // 0-100%
+                const top = Math.floor(Math.random() * 100); // 0-100%
+                const delay = Math.floor(Math.random() * 10); // 0-10s delay
+                const duration = Math.floor(Math.random() * 20) + 10; // 10-30s duration
+                
+                circle.style.width = `${size}px`;
+                circle.style.height = `${size}px`;
+                circle.style.left = `${left}%`;
+                circle.style.top = `${top}%`;
+                circle.style.animationDelay = `${delay}s`;
+                circle.style.animationDuration = `${duration}s`;
+                
+                bgAnimation.appendChild(circle);
+            }
+        }
+        
+        // Call the function when the page loads
+        createFloatingCircles();
+    </script>
+</body>
+</html>
